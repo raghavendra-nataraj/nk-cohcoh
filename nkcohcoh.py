@@ -58,20 +58,23 @@ def isTerminal(board,chance):
     return False
 
 def min_value(board):
-    if isTerminal(board,'b'):
+    chance = whoChance(board)
+    if isTerminal(board,chance):
         return -1
     return min([max_value(state) for state in successors(board)])
 
 def max_value(board):
-    if isTerminal(board,'w'):
+    chance = whoChance(board)
+    if isTerminal(board,chance):
         return 1
     return max([min_value(state) for state in successors(board)])
               
 def solve(board):
     evalVal  = -sys.maxint - 1
     bb = []
+    chance = whoChance(board)
     for state in successors(board):
-        if isTerminal(state,'w'):
+        if isTerminal(state,chance):
             return state
         tempVal = min_value(state)
         if tempVal >= evalVal:
