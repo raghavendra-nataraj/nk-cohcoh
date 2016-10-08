@@ -1,5 +1,9 @@
 import sys
 
+def printBoard(board):
+    for i in range(0,n):
+        print board[i*n:i*n+n]
+
 def whoChance(board):
     w =0
     b =0
@@ -22,42 +26,55 @@ def evalFn(b):
     return 1
 
 def isTerminal(board,chance):
+    num = 0
     h=0
     v=0
-    d1=0
-    d2=0
-    num = 0
+    d1 =0
+    d2 =0
     num = len([i for i in board if i!='.'])
     if num == n**2-1: return 1
     for i in range (0,n):
-        if board[i] == chance: h+=1
-        else: h=0
-        if board[i*n] == chance: v+=1
-        else: v=0
-        if board[i*n+i] == chance: d1+=1
-        else: d1=0
-        if board[i*n +(n-1-i)] == chance: d2+=1
-        else: d2=0
-        if h==k or v==k or d1==k or d2==k:
-            return 1
-    return 0
+        for j in range(0,n):
+            h = 0
+            v = 0
+            d1 = 0
+            d2 = 0
+            for k1 in range(0,k):
+                hc = i*n+j +k1
+                vc = ((i+k1)*n+j)
+                d1c = ((i+k1)*n + j+k1)
+                d2c = ((i+k1)*n + j-k1)
+                if hc < n**2 and j+k<n and board[hc] == chance: h+=1
+                else : h=0
+                if vc < n**2 and board[vc] == chance: v +=1
+                else : v=0
+                if d1c < n**2 and board[d1c] == chance: d1 +=1
+                else : d1=0                
+                if d2c <n**2 and board[d2c] == chance: d2 +=1
+                else : d2=0
+            #print i,j,k1,h,v,d1,d2
+            if d1==k or d2==k or h==k or v==k:
+                return True
+    return False
 
 def min_value(board):
     if isTerminal(board,'b'):
-        return -1#evalFn(b)
+        return -1
     return min([max_value(state) for state in successors(board)])
 
 def max_value(board):
     if isTerminal(board,'w'):
-        return 1#evalFn(b)
+        return 1
     return max([min_value(state) for state in successors(board)])
               
 def solve(board):
     evalVal  = -sys.maxint - 1
     bb = []
     for state in successors(board):
+        if isTerminal(state,'w'):
+            return state
         tempVal = min_value(state)
-        if tempVal > evalVal:
+        if tempVal >= evalVal:
             evalVal = tempVal
             bb = state
     return bb
@@ -65,6 +82,8 @@ def solve(board):
 n = int(sys.argv[1])
 k = int(sys.argv[2])
 board = list(sys.argv[3])
-print solve(board)
+printBoard(solve(board))
+#printBoard(board)
+#print isTerminal(board,'w')
 #for succ in successors(board):
 t = sys.argv[4]
