@@ -46,20 +46,25 @@ def isTerminal(board,chance):
             if d1==k or d2==k or h==k or v==k:
                 return True
     return False
+
 def checkStat(hl):
     n=0;w=0;l=0
     hl = sorted(set(hl))
-    if hl == ['.','w'] or hl == ['w']:
+    if hl == ['.','w']:
         w+=1;n+=1
-    if hl == ['.','b'] or hl == ['b']:
+    if hl == ['w']:
+       n+=1;w+=2 
+    if hl == ['.','b']:
         l+=1;n+=1
+    if hl == ['b']:
+        n+=1;l+=2
     if hl == ['.']:
         n+=1;l+=1;w+=1
     if hl == ['b','w'] or hl == ['.','b','w']:
         n+=1
     return [n,w,l]
 
-def evalFunc(board):
+def evalFunc(board,chance):
     num = 0;w=0;l=0
     for i in range (0,n):
         for j in range(0,n):
@@ -86,30 +91,43 @@ def evalFunc(board):
             if len(d2l)==k :
                 val = checkStat(d2l)
                 num+=val[0];w+=val[1];l+=val[2]
-    print num,w,l
-    return num
+    #printBoard(board)
+    #print chance
+    #print w,l
+    if chance =='w':
+        return num-w-l
+    else:
+        return num-l-w
 
-
-def min_value(board):
+def min_value(board,alpha,beta):
     chance = whoChance(board)
     if isTerminal(board,chance):
-        return -1
-    return min([max_value(state) for state in successors(board)])
+        return evalFunc(board,chance)
+    val = sys.maxint
+    val = min([max_value(state,alpha,beta) for state in successors(board)])
+    if val<=alpha:return val
+    beta = min(beta,val)
+    return val
 
-def max_value(board):
+def max_value(board,alpha,beta):
     chance = whoChance(board)
     if isTerminal(board,chance):
-        return 1
-    return max([min_value(state) for state in successors(board)])
-              
+        return evalFunc(board,chance)
+    val = -sys.maxint
+    val = max([min_value(state,alpha,beta) for state in successors(board)])
+    if val>=beta:return val
+    alpha = max(alpha,val)
+    return val
+
 def solve(board):
     evalVal  = -sys.maxint - 1
     bb = []
     chance = whoChance(board)
+    print chance
     for state in successors(board):
-        tempVal = min_value(state)
-        print tempVal
-        printBoard(state)
+        tempVal = max_value(state,-sys.maxint,sys.maxint)
+        #print tempVal
+        #printBoard(state)
         if tempVal > evalVal:
             evalVal = tempVal
             bb = state
@@ -120,8 +138,8 @@ k = int(sys.argv[2])
 board = list(sys.argv[3])
 printBoard(board)
 print "\n"
-#printBoard(solve(board))
-print evalFunc(board)
+printBoard(solve(board))
+#print evalFunc(board,'w')
 #print isTerminal(board,'w')
 #for succ in successors(board):
    # printBoard(succ)
