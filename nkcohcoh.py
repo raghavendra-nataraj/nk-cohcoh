@@ -22,40 +22,73 @@ def successors(board):
     chance = whoChance(board)
     return [add_marble(board,idx,chance) for idx,i in enumerate(board) if i=='.']
 
-def evalFn(b):
-    return 1
-
 def isTerminal(board,chance):
     num = 0
-    h=0
-    v=0
-    d1 =0
-    d2 =0
     num = len([i for i in board if i!='.'])
     if num == n**2-1: return 1
     for i in range (0,n):
         for j in range(0,n):
-            h = 0
-            v = 0
-            d1 = 0
-            d2 = 0
+            h = 0;v = 0;d1 = 0;d2 = 0
             for k1 in range(0,k):
                 hc = i*n+j +k1
                 vc = ((i+k1)*n+j)
                 d1c = ((i+k1)*n + j+k1)
-                d2c = ((i+k1)*n + j-k1)
-                if hc < n**2 and j+k<n and board[hc] == chance: h+=1
+                d2c = ((i+k1)*n + n-j-k1-1)
+                if hc < n**2 and j+k1<n and board[hc] == chance: h+=1
                 else : h=0
                 if vc < n**2 and board[vc] == chance: v +=1
                 else : v=0
-                if d1c < n**2 and board[d1c] == chance: d1 +=1
+                if d1c < n**2 and j+k1<n and board[d1c] == chance: d1 +=1
                 else : d1=0                
-                if d2c <n**2 and board[d2c] == chance: d2 +=1
+                if d2c <n**2 and j+k1<n and board[d2c] == chance: d2 +=1
                 else : d2=0
             #print i,j,k1,h,v,d1,d2
             if d1==k or d2==k or h==k or v==k:
                 return True
     return False
+def checkStat(hl):
+    n=0;w=0;l=0
+    hl = sorted(set(hl))
+    if hl == ['.','w'] or hl == ['w']:
+        w+=1;n+=1
+    if hl == ['.','b'] or hl == ['b']:
+        l+=1;n+=1
+    if hl == ['.']:
+        n+=1;l+=1;w+=1
+    if hl == ['b','w'] or hl == ['.','b','w']:
+        n+=1
+    return [n,w,l]
+
+def evalFunc(board):
+    num = 0;w=0;l=0
+    for i in range (0,n):
+        for j in range(0,n):
+            h = 0;v = 0;d1 = 0;d2 = 0
+            hl=[];vl=[];d1l=[];d2l=[]
+            for k1 in range(0,k):
+                hc = i*n+j +k1
+                vc = ((i+k1)*n+j)
+                d1c = ((i+k1)*n + j+k1)
+                d2c = ((i+k1)*n + n-j-k1-1)
+                if hc < n**2 and j+k1<n: h+=1;hl.append(board[hc])
+                if vc < n**2: v +=1;vl.append(board[vc])
+                if d1c <n**2 and j+k1<n:d1 +=1;d1l.append(board[d1c])
+                if d2c <n**2 and j+k1<n: d2 +=1;d2l.append(board[d2c])
+            if len(hl)==k :
+                val = checkStat(hl)
+                num+=val[0];w+=val[1];l+=val[2]
+            if len(vl)==k :
+                val = checkStat(vl)
+                num+=val[0];w+=val[1];l+=val[2]
+            if len(d1l)==k :
+                val = checkStat(d1l)
+                num+=val[0];w+=val[1];l+=val[2]
+            if len(d2l)==k :
+                val = checkStat(d2l)
+                num+=val[0];w+=val[1];l+=val[2]
+    print num,w,l
+    return num
+
 
 def min_value(board):
     chance = whoChance(board)
@@ -74,10 +107,10 @@ def solve(board):
     bb = []
     chance = whoChance(board)
     for state in successors(board):
-        if isTerminal(state,chance):
-            return state
         tempVal = min_value(state)
-        if tempVal >= evalVal:
+        print tempVal
+        printBoard(state)
+        if tempVal > evalVal:
             evalVal = tempVal
             bb = state
     return bb
@@ -85,8 +118,11 @@ def solve(board):
 n = int(sys.argv[1])
 k = int(sys.argv[2])
 board = list(sys.argv[3])
-printBoard(solve(board))
-#printBoard(board)
+printBoard(board)
+print "\n"
+#printBoard(solve(board))
+print evalFunc(board)
 #print isTerminal(board,'w')
 #for succ in successors(board):
+   # printBoard(succ)
 t = sys.argv[4]
