@@ -1,8 +1,11 @@
 import sys
-
+import time
+import calendar
+cache = {}
+waitfor = 0
 def printBoard(board):
     for i in range(0,n):
-        print board[i*n:i*n+n]
+        print " ".join(board[i*n:i*n+n])
 
 def whoChance(board):
     w =0
@@ -49,22 +52,24 @@ def isTerminal(board,chance):
 
 def checkStat(hl):
     n=0;w=0;l=0
+    result = False
     hl = sorted(set(hl))
     if hl == ['.','w']:
-        w+=1;n+=1
+        w+=1;n+=2
     if hl == ['w']:
-       n+=1;w+=2 
+       n+=1;w+=4;result = True 
     if hl == ['.','b']:
-        l+=1;n+=1
+        l+=1;n+=2
     if hl == ['b']:
-        n+=1;l+=2
+        n+=1;l+=4;result = True
     if hl == ['.']:
         n+=1;l+=1;w+=1
     if hl == ['b','w'] or hl == ['.','b','w']:
         n+=1
-    return [n,w,l]
+    return [n,w,l,result]
 
 def evalFunc(board,chance):
+    result = False
     num = 0;w=0;l=0
     for i in range (0,n):
         for j in range(0,n):
@@ -82,48 +87,63 @@ def evalFunc(board,chance):
             if len(hl)==k :
                 val = checkStat(hl)
                 num+=val[0];w+=val[1];l+=val[2]
+                if not result: result = val[3]
             if len(vl)==k :
                 val = checkStat(vl)
                 num+=val[0];w+=val[1];l+=val[2]
+                if not result: result = val[3]
             if len(d1l)==k :
                 val = checkStat(d1l)
                 num+=val[0];w+=val[1];l+=val[2]
+                if not result: result = val[3]
             if len(d2l)==k :
                 val = checkStat(d2l)
                 num+=val[0];w+=val[1];l+=val[2]
+                if not result: result = val[3]
     #printBoard(board)
     #print chance
     #print w,l
+    if  len([i for i in board if i!='.']) == n**2-1:
+        result = True
     if chance =='w':
-        return num-w-l
+        return [num-w-l,result]
     else:
-        return num-l-w
+        return [num-l-w,result]
 
 def min_value(board,alpha,beta):
+    global waitfor
     chance = whoChance(board)
-    if isTerminal(board,chance):
-        return evalFunc(board,chance)
-    val = sys.maxint
-    val = min([max_value(state,alpha,beta) for state in successors(board)])
-    if val<=alpha:return val
+    name = "".join(board)
+    if name not in cache:
+        status = cache[name] = evalFunc(board,chance)
+    status = cache[name]
+    #if isTerminal(board,chance):
+    if status[1]:
+        return status[0]
+    val = min(beta,[max_value(state,alpha,beta) for state in successors(board) if  calendar.timegm(time.gmtime())<=waitfor])
     beta = min(beta,val)
+    if alpha>=beta:return beta
     return val
 
 def max_value(board,alpha,beta):
+    global waitfor
     chance = whoChance(board)
-    if isTerminal(board,chance):
-        return evalFunc(board,chance)
-    val = -sys.maxint
-    val = max([min_value(state,alpha,beta) for state in successors(board)])
-    if val>=beta:return val
+    name = "".join(board)
+    if name not in cache:
+        status = cache[name] = evalFunc(board,chance)
+    status = cache[name]
+    #if isTerminal(board,chance):
+    if status[1]:
+        return status[0]
+    val = max(alpha,[min_value(state,alpha,beta) for state in successors(board) if calendar.timegm(time.gmtime())<=waitfor])
     alpha = max(alpha,val)
+    if alpha>=beta:return alpha
     return val
 
 def solve(board):
     evalVal  = -sys.maxint - 1
     bb = []
     chance = whoChance(board)
-    print chance
     for state in successors(board):
         tempVal = max_value(state,-sys.maxint,sys.maxint)
         #print tempVal
@@ -133,14 +153,23 @@ def solve(board):
             bb = state
     return bb
 
+print sys.argv
 n = int(sys.argv[1])
 k = int(sys.argv[2])
 board = list(sys.argv[3])
-printBoard(board)
-print "\n"
-printBoard(solve(board))
+t = int(sys.argv[4])
+waitfor =  calendar.timegm(time.gmtime())+t-1
+#printBoard(board)
+#print "\n"
+if whoChance(board)=="w":
+    chance = "b"
+else:
+    chance = "w"
+if isTerminal(board,chance):
+    print "Hey you lost"
+else:
+    printBoard(solve(board))
 #print evalFunc(board,'w')
 #print isTerminal(board,'w')
 #for succ in successors(board):
    # printBoard(succ)
-t = sys.argv[4]
