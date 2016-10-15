@@ -1,0 +1,4 @@
+w b b w
+b . b b
+w w . .
+w b w w
