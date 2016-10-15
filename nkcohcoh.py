@@ -63,18 +63,18 @@ def checkStat(hl):
     if hl == ['.','w']:
         w+=2;n+=1
     if hl == ['w']:
-       n+=1;w+=3;result = True 
+       n+=1;w+=4;result = True 
     if hl == ['.','b']:
         l+=2;n+=1
     if hl == ['b']:
-        n+=1;l+=3;result = True
+        n+=1;l+=4;result = True
     if hl == ['.']:
         n+=1;l+=1;w+=1
     if hl == ['b','w'] or hl == ['.','b','w']:
         n+=1
     return [n,w,l,result]
 
-def evalFunc(board,chance):
+def evalFunc(board,chance,depth):
     result = False
     num = 0;w=0;l=0
     for i in range (0,n):
@@ -109,16 +109,16 @@ def evalFunc(board,chance):
     if  len([i for i in board if i!='.']) == n**2:
         result = True
     if chance =='w':
-        return [num-w-l,result]
+        return [num-w-l+depth,result]
     else:
-        return [num-l-w,result]
+        return [num-l-w+depth,result]
 
 def min_value(st,alpha,beta):
     global waitfor
     chance = whoChance(st.board)
     name = "".join(st.board)
     if name not in cache:
-        status = cache[name] = evalFunc(st.board,chance)
+        status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
     #if isTerminal(board,chance):
     if status[1]:
@@ -135,7 +135,7 @@ def max_value(st,alpha,beta):
     chance = whoChance(st.board)
     name = "".join(st.board)
     if name not in cache:
-        status = cache[name] = evalFunc(st.board,chance)
+        status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
     if status[1]:
         return status[0]
@@ -151,9 +151,10 @@ def solve(st):
     bb = []
     chance = whoChance(st.board)
     for state in successors(st):
-        tempVal = max_value(state,-sys.maxint,sys.maxint)
+        #print state.board
+        tempVal = min_value(state,-sys.maxint,sys.maxint)
         #print tempVal
-        #printBoard(state)
+        #printBoard(state.board)
         if tempVal > evalVal:
             evalVal = tempVal
             bb = state
@@ -176,3 +177,4 @@ else:
         depth+=1
         goal = solve(State(board,0)).board
         printBoard(goal)
+        print "\n"
