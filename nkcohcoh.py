@@ -106,9 +106,6 @@ def evalFunc(board,chance):
                 val = checkStat(d2l)
                 num+=val[0];w+=val[1];l+=val[2]
                 if not result: result = val[3]
-    #printBoard(board)
-    #print chance
-    #print w,l
     if  len([i for i in board if i!='.']) == n**2:
         result = True
     if chance =='w':
@@ -175,7 +172,7 @@ else:
 if isTerminal(board,chance):
     print "Hey you lost"
 else:
-    while waitfor>calendar.timegm(time.gmtime()):
+    while waitfor>calendar.timegm(time.gmtime()) and depth<n**2:
         depth+=1
         goal = solve(State(board,0)).board
-printBoard(goal)
+        printBoard(goal)
