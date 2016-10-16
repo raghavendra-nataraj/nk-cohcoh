@@ -61,13 +61,13 @@ def checkStat(hl):
     result = False
     hl = sorted(set(hl))
     if hl == ['.','w']:
-        w+=2;n+=1
+        w+=1;n+=1
     if hl == ['w']:
-       n+=1;w+=4;result = True 
+       n+=1;w+=1;result = True 
     if hl == ['.','b']:
-        l+=2;n+=1
+        l+=1;n+=1
     if hl == ['b']:
-        n+=1;l+=4;result = True
+        n+=1;l+=1;result = True
     if hl == ['.']:
         n+=1;l+=1;w+=1
     if hl == ['b','w'] or hl == ['.','b','w']:
@@ -77,6 +77,7 @@ def checkStat(hl):
 def evalFunc(board,chance,depth):
     result = False
     num = 0;w=0;l=0
+    extra = 0
     for i in range (0,n):
         for j in range(0,n):
             h = 0;v = 0;d1 = 0;d2 = 0
@@ -108,6 +109,8 @@ def evalFunc(board,chance,depth):
                 if not result: result = val[3]
     if  len([i for i in board if i!='.']) == n**2:
         result = True
+    #printBoard(board)
+    #print w,l
     if chance =='w':
         return [num-w-l+depth,result]
     else:
@@ -121,7 +124,7 @@ def min_value(st,alpha,beta):
         status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
     #if isTerminal(board,chance):
-    if status[1]:
+    if status[1]  or st.depth>depth:
         return status[0]
     vals = [max_value(state,alpha,beta) for state in successors(st) if st.depth < depth]
     vals.append(beta)
@@ -137,7 +140,7 @@ def max_value(st,alpha,beta):
     if name not in cache:
         status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
-    if status[1]:
+    if status[1] or st.depth>depth:
         return status[0]
     vals = [min_value(state,alpha,beta) for state in successors(st) if st.depth < depth]
     vals.append(alpha)
@@ -173,7 +176,7 @@ else:
 if isTerminal(board,chance):
     print "Hey you lost"
 else:
-    while waitfor>calendar.timegm(time.gmtime()) and depth<n**2:
+    while waitfor>calendar.timegm(time.gmtime()) and depth<board.count('.'):
         depth+=1
         goal = solve(State(board,0)).board
         printBoard(goal)
