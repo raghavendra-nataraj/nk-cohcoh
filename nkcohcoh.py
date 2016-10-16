@@ -28,7 +28,7 @@ def add_marble(board,index,chance):
     return tmpBoard
     
 def successors(st):
-    chance = whoChance(board)
+    chance = whoChance(st.board)
     return [State(add_marble(st.board,idx,chance),st.depth+1) for idx,i in enumerate(st.board) if i=='.']
 
 def isTerminal(board,chance):
@@ -61,17 +61,17 @@ def checkStat(hl):
     result = False
     hl = sorted(set(hl))
     if hl == ['.','w']:
-        w+=1;n+=1
+        n+=1;w+=-0.8;l+=0.3
     if hl == ['w']:
-       n+=1;w+=1;result = True 
+       n+=1;w-=2;l+=0.5;result = True 
     if hl == ['.','b']:
-        l+=1;n+=1
+        l+=-0.8;n+=1;w+=0.3
     if hl == ['b']:
-        n+=1;l+=1;result = True
+        n+=1;l-=2;w+=0.5;result = True
     if hl == ['.']:
-        n+=1;l+=1;w+=1
+        n+=1;l+=0.5;w+=0.5
     if hl == ['b','w'] or hl == ['.','b','w']:
-        n+=1
+        n+=1;l+=1;w+=1
     return [n,w,l,result]
 
 def evalFunc(board,chance,depth):
@@ -112,9 +112,9 @@ def evalFunc(board,chance,depth):
     #printBoard(board)
     #print w,l
     if chance =='w':
-        return [num-w-l+depth,result]
+        return [w,result]
     else:
-        return [num-l-w+depth,result]
+        return [l,result]
 
 def min_value(st,alpha,beta):
     global waitfor
@@ -124,9 +124,9 @@ def min_value(st,alpha,beta):
         status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
     #if isTerminal(board,chance):
-    if status[1]  or st.depth>depth:
+    if status[1]  or st.depth>=depth:
         return status[0]
-    vals = [max_value(state,alpha,beta) for state in successors(st) if st.depth < depth]
+    vals = [max_value(state,alpha,beta) for state in successors(st) if st.depth <=depth]
     vals.append(beta)
     val = min(vals)
     beta = min(beta,val)
@@ -140,9 +140,9 @@ def max_value(st,alpha,beta):
     if name not in cache:
         status = cache[name] = evalFunc(st.board,chance,st.depth)
     status = cache[name]
-    if status[1] or st.depth>depth:
+    if status[1] or st.depth>=depth:
         return status[0]
-    vals = [min_value(state,alpha,beta) for state in successors(st) if st.depth < depth]
+    vals = [min_value(state,alpha,beta) for state in successors(st) if st.depth <=depth]
     vals.append(alpha)
     val = max(vals)
     alpha = max(alpha,val)
@@ -162,7 +162,7 @@ def solve(st):
             evalVal = tempVal
             bb = state
     return bb
-depth = 2
+depth = 0
 print sys.argv
 n = int(sys.argv[1])
 k = int(sys.argv[2])
