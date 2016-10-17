@@ -111,10 +111,10 @@ def evalFunc(board,chance,depth):
         result = True
     #printBoard(board)
     #print w,l
-    if chance =='w':
-        return [w,result]
+    if ch =='w':
+        return [(l-w)+depth,result]
     else:
-        return [l,result]
+        return [(w-l)+depth,result]
 
 def min_value(st,alpha,beta):
     global waitfor
@@ -170,14 +170,15 @@ board = list(sys.argv[3])
 t = int(sys.argv[4])
 waitfor =  calendar.timegm(time.gmtime())+t-1
 if whoChance(board)=="w":
-    chance = "b"
+    ch = "b"
 else:
-    chance = "w"
-if isTerminal(board,chance):
-    print "Hey you lost"
+    ch = "w"
+if isTerminal(board,ch):
+    print "Game Over"
 else:
     while waitfor>calendar.timegm(time.gmtime()) and depth<board.count('.'):
         depth+=1
         goal = solve(State(board,0)).board
-        printBoard(goal)
+        #printBoard(goal)
+	print "".join(goal)
         print "\n"
